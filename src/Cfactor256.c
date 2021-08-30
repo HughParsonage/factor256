@@ -161,7 +161,10 @@ SEXP Cfactor256_in(SEXP x, SEXP tbl, SEXP Not) {
   const unsigned char * xp = RAW(x);
   const unsigned char * yp = RAW(tbl);
 
-  bool w[256] = {no};
+  bool w[256] = {0};
+  for (int j = 0; j < 256; ++j) {
+    w[j] = no;
+  }
   for (int j = 0; j < m; ++j) {
     w[yp[j]] = no ? 0 : 1;
   }

@@ -9,6 +9,7 @@ State1 <- factor256(c("NSW", "VIC", "VIC", "NSW"),
 
 expect_true(is.raw(State1))
 expect_equal(factor256_in(State1, "NSW"), c(TRUE, FALSE, FALSE, TRUE))
+expect_equal(factor256_notin(State1, "NSW"), !c(TRUE, FALSE, FALSE, TRUE))
 
 State_f <- factor256(c(NA, "NSW", "VIC", "NSW"), level = c("NSW", "VIC"))
 expect_equal(recompose256(State_f), c(NA, "NSW", "VIC", "NSW"))
