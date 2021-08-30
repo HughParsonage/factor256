@@ -11,6 +11,7 @@
 extern SEXP BSearch(SEXP, SEXP);
 extern SEXP C_asInteger0(SEXP);
 extern SEXP Cfactor256_in(SEXP, SEXP, SEXP);
+extern SEXP Cfactor2562logical(SEXP);
 extern SEXP Cint2factor256(SEXP);
 extern SEXP Clogical2factor256(SEXP);
 extern SEXP CStackMatch(SEXP, SEXP);
@@ -19,6 +20,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"BSearch",            (DL_FUNC) &BSearch,            2},
     {"C_asInteger0",       (DL_FUNC) &C_asInteger0,       1},
     {"Cfactor256_in",      (DL_FUNC) &Cfactor256_in,      3},
+    {"Cfactor2562logical", (DL_FUNC) &Cfactor2562logical, 1},
     {"Cint2factor256",     (DL_FUNC) &Cint2factor256,     1},
     {"Clogical2factor256", (DL_FUNC) &Clogical2factor256, 1},
     {"CStackMatch",        (DL_FUNC) &CStackMatch,        2},

@@ -66,6 +66,9 @@ recompose256 <- function(f) {
     stop("Internal error: f was type ", typeof(f), " but type raw was expected.") # nocov
   }
   lf <- levels(f)
+  if (is.logical(lf)) {
+    return(.Call("Cfactor2562logical", f, PACKAGE = packageName()))
+  }
   lf[as.integer0(f)]
 }
 
