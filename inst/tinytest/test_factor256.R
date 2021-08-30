@@ -21,6 +21,10 @@ expect_identical(factor256:::StackMatch(stackx), as.raw(match(stackx, unique(sta
 stackx <- c(1L, 5L, -.Machine$integer.max, .Machine$integer.max)
 expect_identical(factor256:::StackMatch(stackx), as.raw(match(stackx, unique(stackx))))
 
+lglx <- c(runif(10) > 0.8, NA, runif(3) > 0.2, NA, TRUE, FALSE)
+lglf <- factor256(lglx)
+expect_true(is.raw(lglf))
+expect_equal(recompose256(lglf), lglx)
 
 # expect_equal(sum_equal(State1, "NSW"), 2)
 
