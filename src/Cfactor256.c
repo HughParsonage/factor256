@@ -154,7 +154,7 @@ SEXP Cfactor256_in(SEXP x, SEXP tbl, SEXP Not) {
     error("(Internal error): x or tbl not RAWSXP"); // # nocov
   }
   if (xlength(tbl) >= 256) {
-    error("xlength(tbl) >= 256 (duplicated entries to tbl)");
+    error("xlength(tbl) >= 256 (duplicated entries to tbl)"); // # nocov
   }
   R_xlen_t N = xlength(x);
   int m = length(tbl);
