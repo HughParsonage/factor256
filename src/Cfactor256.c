@@ -12,47 +12,30 @@ int subtract(int a, int b) {
   return aa - bb;
 }
 
-unsigned int djb2_hash(const char * str, int n, int i) {
-  unsigned int hash = 5381;
-  while (++i < n) {
-    unsigned char xi = str[i];
-    hash = ((hash << 5) + hash) ^ xi;
-  }
-  return hash;
+SEXP ScalarLength(R_xlen_t i) {
+  return (i <= INT_MAX) ? ScalarInteger(i) : ScalarReal(i);
 }
 
-SEXP Cchmatch256(SEXP x) {
-  if (!isString(x)) {
-    return R_NilValue;
-  }
+R_xlen_t isntSorted256(SEXP x, bool s) {
   R_xlen_t N = xlength(x);
-  if (N <= 1) {
-    return ScalarInteger(1);
+  if (isntRaw(x) || N <= 1) {
+    return 0;
   }
-
-  const SEXP * xp = STRING_PTR(x);
-  SEXP ans = PROTECT(allocVector(INTSXP, N));
-  int * restrict ansp = INTEGER(ans);
-
-  // SEXP uX = PROTECT(allocVector(STRSXP, 256));
-  // SEXP * uXp = STRING_PTR(uX);
-  // uXp[0] = xp[0];
-  ansp[0] = length(xp[0]);
-  // int n_assigned = 1;
-
-  for (R_xlen_t i = 0; i < N; ++i) {
-    SEXP xpi = xp[i];
-    const char * cxpi = CHAR(xpi);
-
-    // Perhaps this is sufficient for the vast majority of cases???
-    int ni = length(xpi) + cxpi[0];
-    // ansp[i] = djb2_hash(cxpi, ni, -1) & FACTOR256_STACK_SIZD;
-    ansp[i] = ni;
+  const unsigned char * xp = RAW(x);
+  for (R_xlen_t i = 1; i < N; ++i) {
+    unsigned int xpi0 = xp[i - 1];
+    unsigned int xpi1 = xp[i];
+    bool unsorted = s ? xpi0 >= xpi1 : xpi0 > xpi1;
+    if (unsorted) {
+      return i + 1;
+    }
   }
+  return 0;
+}
 
-  UNPROTECT(1);
-  return ans;
-
+SEXP CisntSorted256(SEXP x, SEXP strictly) {
+  const bool s = asLogical(strictly);
+  return ScalarLength(isntSorted256(x, s));
 }
 
 R_xlen_t nonDuplicated(SEXP x, SEXP h) {

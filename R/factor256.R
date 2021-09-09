@@ -33,7 +33,16 @@
 #' }
 #'
 #' @examples
-#' ff
+#' f10 <- factor256(1:10)
+#'
+#' fletters <- factor256(rep(letters, 1:26))
+#' head(factor256_in(fletters, "g"))
+#' head(tabulate256(fletters))
+#' head(recompose256(fletters))
+#'
+#' gletters <- factor256(rep(letters, 1:26), levels = letters[1:25])
+#' tail(tabulate256(gletters))
+
 #'
 #'
 #' @export
@@ -138,7 +147,7 @@ is.factor256 <- function(x) {
   inherits(x, "factor256")
 }
 
-#' @rdname factor256
+
 #' @export
 "[.factor256" <- function(x, i, ...) {
   lvls <- levels(x)
@@ -148,10 +157,23 @@ is.factor256 <- function(x) {
   o
 }
 
+#' @method is.unsorted factor256
+#' @export
+is.unsorted.factor256 <- function(x, strictly = FALSE, ...) {
+  o <- .Call("CisntSorted256", x, strictly, PACKAGE = packageName())
+  as.logical(o)
+}
+
+
+#' @export
+anyNA.factor256 <- function(x, ...) {
+  FALSE
+}
+
 #' @rdname factor256
 #' @export
-is.unsorted.factor256 <- function(x) {
-
+isntSorted256 <- function(x, strictly = FALSE) {
+  .Call("CisntSorted256", x, strictly, PACKAGE = packageName())
 }
 
 #' @rdname factor256
@@ -242,10 +264,6 @@ unique_raw <- function(x) {
   stopifnot(is.raw(x))
   tx <- tabulate256(x)
   as.raw(0:255)[tx > 0]
-}
-
-chmatch256 <- function(x) {
-  .Call("Cchmatch256", x, PACKAGE = packageName())
 }
 
 nonDuplicated <- function(x, h) {

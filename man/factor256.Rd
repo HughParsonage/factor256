@@ -5,7 +5,7 @@
 \alias{recompose256}
 \alias{levels.factor256}
 \alias{is.factor256}
-\alias{[.factor256}
+\alias{isntSorted256}
 \alias{as_factor}
 \alias{factor256_in}
 \alias{factor256_notin}
@@ -22,7 +22,7 @@ recompose256(f)
 
 is.factor256(x)
 
-\method{[}{factor256}(x, i, ...)
+isntSorted256(x, strictly = FALSE)
 
 as_factor(x)
 
@@ -71,7 +71,15 @@ Whereas base R's factors as based on 32-bit integer vectors,
 \code{factor256} uses 8-bit raw vectors to minimize memory footprints
 }
 \examples{
-ff
+f10 <- factor256(1:10)
+
+fletters <- factor256(rep(letters, 1:26))
+head(factor256_in(fletters, "g"))
+head(tabulate256(fletters))
+head(recompose256(fletters))
+
+gletters <- factor256(rep(letters, 1:26), levels = letters[1:25])
+tail(tabulate256(gletters))
 
 
 }

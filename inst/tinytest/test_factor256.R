@@ -58,6 +58,10 @@ library(utils)
 expect_equal(head(cc), recompose256(head(cc_f256)))
 expect_equal(tail(cc), recompose256(tail(cc_f256)))
 
+expect_true(is.unsorted(factor256(c("A", "A", "B", "A"), levels = LETTERS)))
+expect_false(is.unsorted(factor256(c("A", "A", "B", "C"), levels = LETTERS)))
+expect_true(is.unsorted(factor256(c("A", "A", "B", "C"), levels = LETTERS), strictly = TRUE))
+
 
 
 # expect_equal(sum_equal(State1, "NSW"), 2)
