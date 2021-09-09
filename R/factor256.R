@@ -9,13 +9,32 @@
 #' @param levels An optional vector of the unique values of \code{x}.
 #'
 #' @param f A raw vector of class \code{factor256}.
-#' @param tbl The table of values to lookup in \code{f}.
+#' @param tbl The table of values to lookup in \code{f}. May be a \code{factor256}
+#' class but will be implicitly converted based on the levels of \code{f}.
 #'
-#' @return A raw vector of class \code{factor256}.
-#'
+#' @return
+#' \code{factor256} is a class based on raw vectors.
 #' Values in \code{x} absent from \code{levels} are mapped to \code{00}.
 #'
-#' \code{recompose256} is the inverse operation.
+#' In the following list, \code{o} is the result.
+#'
+#' \describe{
+#' \item{\code{factor256}}{A raw vector of class \code{factor256}.}
+#' \item{\code{recompose256}}{is the inverse operation.}
+#' \item{\code{factor256_e?(not)?in}}{A logical vector the same length of \code{f}, \code{o[i] = TRUE} if
+#' \code{f[i]} is among the values of \code{tbl} when converted to \code{factor256}.
+#' \code{_notin} is the negation. The \code{factor256_e} variants will error if
+#' none of the values of \code{tbl} are present in \code{f}.}
+#' \item{\code{tabulate256}}{Takes a raw vector and counts the number of times
+#' each element occurs within it. It is always length-256; if an element is absent
+#' it will have value zero in the output.}
+#' \item{\code{as_factor}}{Converts from \code{factor256} to \code{factor}.}
+#'
+#' }
+#'
+#' @examples
+#' ff
+#'
 #'
 #' @export
 
@@ -76,13 +95,7 @@ logical2factor256 <- function(x, levels = NULL) {
   ans <- .Call("Clogical2factor256", x, PACKAGE = packageName())
 }
 
-integer2factor256 <- function(x, levels = NULL) {
-  if (is.null(levels)) {
-    levels <- unique(x)
-    if (length(levels) >= 256L) {
-      stop("`length(unique(x)) = ", length(levels), "` but must be less than 256.")
-    }
-  }
+integer2factor256 <- function(x, levels) {
   mx <- match(x, levels, nomatch = 0L)
   .Call("Cint2factor256", mx, PACKAGE = packageName())
 }
@@ -93,6 +106,7 @@ character2factor256 <- function(x, ux, anyNAx) {
 }
 
 as.integer0 <- function(x) {
+  # same as integer but converts 0 to NA
   .Call("C_asInteger0", x, PACKAGE = packageName())
 }
 
@@ -106,13 +120,10 @@ StackMatch <- function(x, ux = NULL) {
   }
   ans <- .Call("CStackMatch", x, as.integer(ux), PACKAGE = packageName())
   if (is.null(ans)) {
+    message("Falling back in StackMatch")
     return(as.raw(match(x, ux, nomatch = 0L)))
   }
   ans
-}
-
-Bsearch <- function(a, x) {
-  .Call("BSearch", as.integer(a), as.integer(x), PACKAGE = packageName())
 }
 
 #' @rdname factor256
@@ -125,6 +136,35 @@ levels.factor256 <- function(x) {
 #' @export
 is.factor256 <- function(x) {
   inherits(x, "factor256")
+}
+
+#' @rdname factor256
+#' @export
+"[.factor256" <- function(x, i, ...) {
+  lvls <- levels(x)
+  o <- as.raw(x)[i]
+  attr(o, "factor256_levels") <- lvls
+  class(o) <- oldClass(x)
+  o
+}
+
+#' @rdname factor256
+#' @export
+is.unsorted.factor256 <- function(x) {
+
+}
+
+#' @rdname factor256
+#' @export
+as_factor <- function(x) {
+  if (is.factor(x)) {
+    return(x)
+  }
+  lvls <- levels(x)
+  f <- as.integer0(x)
+  class(f) <- "factor"
+  levels(f) <- lvls
+  f
 }
 
 #' @rdname factor256
@@ -143,6 +183,90 @@ factor256_notin <- function(x, tbl) {
   .Call("Cfactor256_in", x, tbl, TRUE, PACKAGE = packageName())
 }
 
+#' @rdname factor256
+#' @export
+factor256_ein <- function(x, tbl) {
+  x <- factor256(x)
+  if (anyDuplicated(tbl)) {
+    stop("`anyDuplicated(tbl) = ", anyDuplicated(tbl), "`. Remove duplicate elements from tbl.")
+  }
+
+  tbl256 <- factor256(tbl, levels(x))
+  ux <- unique_raw(x)
+  for (j in seq_along(tbl)) {
+    if (!(as.raw(tbl256[j]) %in% ux)) {
+      stop("`tbl` contained ", tbl[j], ", but this value was not found in x. ",
+           "All values of `tbl` must be in `x`. Ensure you have specified `tbl` correctly.")
+    }
+  }
+  .Call("Cfactor256_in", x, tbl256, FALSE, PACKAGE = packageName())
+}
+
+#' @rdname factor256
+#' @export
+factor256_enotin <- function(x, tbl) {
+  x <- factor256(x)
+  tbl256 <- factor256(tbl, levels(x))
+  ux <- unique_raw(x)
+  for (j in seq_along(tbl)) {
+    if (!(as.raw(tbl256[j]) %in% ux)) {
+      stop("`tbl` contained ", tbl[j], ", but this value was not found in x. ",
+           "All values of `tbl` must be in `x`. Ensure you have specified `tbl` correctly.")
+    }
+  }
+  .Call("Cfactor256_in", x, tbl256, TRUE, PACKAGE = packageName())
+}
+
+#' @rdname factor256
+#' @export
+tabulate256 <- function(f) {
+  stopifnot(is.raw(f))
+  .Call("Ctabulate256", f, PACKAGE = packageName())
+}
+
+rank256 <- function(x) {
+  if (!is.raw(x)) {
+    return(order(x))
+  }
+  .Call("C_rank256", x, FALSE, PACKAGE = packageName())
+}
+
+order256 <- function(x) {
+  if (!is.raw(x)) {
+    return(order(x))
+  }
+  .Call("C_rank256", x, TRUE, PACKAGE = packageName())
+}
+
+unique_raw <- function(x) {
+  stopifnot(is.raw(x))
+  tx <- tabulate256(x)
+  as.raw(0:255)[tx > 0]
+}
+
+chmatch256 <- function(x) {
+  .Call("Cchmatch256", x, PACKAGE = packageName())
+}
+
+nonDuplicated <- function(x, h) {
+  .Call("C_nonDuplicated", x, h, PACKAGE = packageName())
+}
+
+
+interlace256 <- function(x, y, z, w) {
+  stopifnot(is.raw(x), is.raw(y), length(x) == length(y))
+  if (!is.raw(z)) {
+    z <- raw(length(x))
+  }
+  if (!is.raw(w)) {
+    w <- raw(length(w))
+  }
+  .Call("C_interlace256", x, y, z, w, PACKAGE = packageName())
+}
+
+deinterlace256 <- function(r, new_names = paste0("r", 0:3)) {
+  .Call("C_deinterlace256", r, PACKAGE = packageName())
+}
 
 
 

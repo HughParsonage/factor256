@@ -5,8 +5,13 @@
 \alias{recompose256}
 \alias{levels.factor256}
 \alias{is.factor256}
+\alias{[.factor256}
+\alias{as_factor}
 \alias{factor256_in}
 \alias{factor256_notin}
+\alias{factor256_ein}
+\alias{factor256_enotin}
+\alias{tabulate256}
 \title{Factors of fewer than 256 elements}
 \usage{
 factor256(x, levels = NULL)
@@ -17,9 +22,19 @@ recompose256(f)
 
 is.factor256(x)
 
+\method{[}{factor256}(x, i, ...)
+
+as_factor(x)
+
 factor256_in(x, tbl)
 
 factor256_notin(x, tbl)
+
+factor256_ein(x, tbl)
+
+factor256_enotin(x, tbl)
+
+tabulate256(f)
 }
 \arguments{
 \item{x}{An atomic vector with fewer than 256 elements.}
@@ -28,16 +43,35 @@ factor256_notin(x, tbl)
 
 \item{f}{A raw vector of class \code{factor256}.}
 
-\item{tbl}{The table of values to lookup in \code{f}.}
+\item{tbl}{The table of values to lookup in \code{f}. May be a \code{factor256}
+class but will be implicitly converted based on the levels of \code{f}.}
 }
 \value{
-A raw vector of class \code{factor256}.
-
+\code{factor256} is a class based on raw vectors.
 Values in \code{x} absent from \code{levels} are mapped to \code{00}.
 
-\code{recompose256} is the inverse operation.
+In the following list, \code{o} is the result.
+
+\describe{
+\item{\code{factor256}}{A raw vector of class \code{factor256}.}
+\item{\code{recompose256}}{is the inverse operation.}
+\item{\code{factor256_e?(not)?in}}{A logical vector the same length of \code{f}, \code{o[i] = TRUE} if
+\code{f[i]} is among the values of \code{tbl} when converted to \code{factor256}.
+\code{_notin} is the negation. The \code{factor256_e} variants will error if
+none of the values of \code{tbl} are present in \code{f}.}
+\item{\code{tabulate256}}{Takes a raw vector and counts the number of times
+each element occurs within it. It is always length-256; if an element is absent
+it will have value zero in the output.}
+\item{\code{as_factor}}{Converts from \code{factor256} to \code{factor}.}
+
+}
 }
 \description{
 Whereas base R's factors as based on 32-bit integer vectors,
 \code{factor256} uses 8-bit raw vectors to minimize memory footprints
+}
+\examples{
+ff
+
+
 }
