@@ -12,6 +12,9 @@
 #' @param tbl The table of values to lookup in \code{f}. May be a \code{factor256}
 #' class but will be implicitly converted based on the levels of \code{f}.
 #'
+#' @param strictly If \code{TRUE} then if \code{x[i] == x[j]} and \code{i != j}
+#' then \code{x} is not sorted.
+#'
 #' @return
 #' \code{factor256} is a class based on raw vectors.
 #' Values in \code{x} absent from \code{levels} are mapped to \code{00}.
@@ -268,35 +271,8 @@ unique_raw <- function(x) {
 
 
 
-interlace256 <- function(x, y, z, w) {
-  stopifnot(is.raw(x), is.raw(y), length(x) == length(y))
-  if (!is.raw(z)) {
-    z <- raw(length(x))
-  }
-  if (!is.raw(w)) {
-    w <- raw(length(w))
-  }
-  .Call("C_interlace256", x, y, z, w, PACKAGE = packageName())
-}
 
-deinterlace256 <- function(r, new_names = paste0("r", 0:3)) {
-  .Call("C_deinterlace256", r, PACKAGE = packageName())
-}
 
-isntSortedFw16 <- function(x, d = 0L) {
-  .Call("CisSorted_d", x, d, PACKAGE = packageName())
-}
-
-SortFw16 <- function(x, d = 0L) {
-  # c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 10L, 11L, 12L, 13L, 16L, 17L,
-  #   18L, 21L, 22L, 23L, 25L, 26L, 27L, 28L, 29L, 30L, 31L, 32L, 33L,
-  #   34L, 35L, 36L)
-
-  for (.d in d) {
-    x <- .Call("CSortFw16", x, .d, PACKAGE = packageName())
-  }
-  x
-}
 
 
 

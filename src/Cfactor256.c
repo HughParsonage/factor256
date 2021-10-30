@@ -70,8 +70,6 @@ SEXP BSearch(SEXP aa, SEXP xx) {
   return ans;
 }
 
-
-
 SEXP CStackMatch(SEXP x, SEXP ux) {
   // match(x, ux, nomatch = 0L) but type raw
   if (!isInteger(x) || !isInteger(ux)) {
@@ -490,26 +488,99 @@ unsigned int interlace(unsigned char x, unsigned char y, unsigned char z, unsign
   return o + w;
 }
 
-SEXP C_interlace256(SEXP x, SEXP y, SEXP z, SEXP w) {
-  if (isntRaw(x) || isntRaw(y) || isntRaw(z) || isntRaw(w) ||
-      xlength(x) != xlength(y) || xlength(x) != xlength(w) ||
-      xlength(x) != xlength(z)) {
-    return x;
-  }
-  R_xlen_t N = xlength(x);
-  const unsigned char * xp = RAW(x);
-  const unsigned char * yp = RAW(y);
-  const unsigned char * zp = RAW(z);
+SEXP C_interlace256_wx(SEXP w, SEXP x) {
+  R_xlen_t N = xlength(w);
   const unsigned char * wp = RAW(w);
-
+  const unsigned char * xp = RAW(x);
   SEXP ans = PROTECT(allocVector(INTSXP, N));
   int * restrict ansp = INTEGER(ans);
-
   for (R_xlen_t i = 0; i < N; ++i) {
-    ansp[i] = interlace(xp[i], yp[i], zp[i], wp[i]);
+    unsigned int o = wp[i];
+    o <<= 8;
+    o += xp[i];
+    ansp[i] = o;
   }
   UNPROTECT(1);
   return ans;
+}
+
+SEXP C_interlace256_wxy(SEXP w, SEXP x, SEXP y) {
+  R_xlen_t N = xlength(w);
+  const unsigned char * wp = RAW(w);
+  const unsigned char * xp = RAW(x);
+  const unsigned char * yp = RAW(y);
+  SEXP ans = PROTECT(allocVector(INTSXP, N));
+  int * restrict ansp = INTEGER(ans);
+  for (R_xlen_t i = 0; i < N; ++i) {
+    unsigned int o = wp[i];
+    o <<= 8;
+    o += xp[i];
+    o <<= 8;
+    o += yp[i];
+    ansp[i] = o;
+  }
+  UNPROTECT(1);
+  return ans;
+}
+
+SEXP C_interlace256_wxyz(SEXP w, SEXP x, SEXP y, SEXP z) {
+  R_xlen_t N = xlength(w);
+  const unsigned char * wp = RAW(w);
+  const unsigned char * xp = RAW(x);
+  const unsigned char * yp = RAW(y);
+  const unsigned char * zp = RAW(z);
+  SEXP ans = PROTECT(allocVector(INTSXP, N));
+  int * restrict ansp = INTEGER(ans);
+  for (R_xlen_t i = 0; i < N; ++i) {
+    unsigned int o = wp[i];
+    o <<= 8;
+    o += xp[i];
+    o <<= 8;
+    o += yp[i];
+    o <<= 8;
+    o += zp[i];
+    ansp[i] = o;
+  }
+  UNPROTECT(1);
+  return ans;
+}
+
+SEXP C_interlace256(SEXP w, SEXP x, SEXP y, SEXP z) {
+  if (y == R_NilValue && z != R_NilValue) {
+    return C_interlace256(w, x, z, y);
+  }
+
+  if (isntRaw(w)) {
+    error("`w` was type '%s' but must be a raw vector.", type2char(TYPEOF(w)));
+  }
+  if (isntRaw(x)) {
+    error("`x` was type '%s' but must be a raw vector.", type2char(TYPEOF(x)));
+  }
+  if (xlength(w) != xlength(x)) {
+    error("`xlength(w) != xlength(x)");
+  }
+  R_xlen_t N = xlength(w);
+  if (z == R_NilValue && y == R_NilValue) {
+    return C_interlace256_wx(w, x);
+  }
+
+  if (isntRaw(y)) {
+    error("`y` was type '%s' but must be a raw vector.", type2char(TYPEOF(y)));
+  }
+  if (xlength(y) != N) {
+    error("`length(y) != length(w)");
+  }
+  if (z == R_NilValue) {
+    return C_interlace256_wxy(w, x, y);
+  }
+
+  if (isntRaw(z)) {
+    error("`z` was type '%s' but must be a raw vector.", type2char(TYPEOF(z)));
+  }
+  if (xlength(z) != N) {
+    error("`length(z) != length(w)");
+  }
+  return C_interlace256_wxyz(w, x, y, z);
 }
 
 SEXP C_deinterlace256(SEXP r) {
@@ -540,10 +611,10 @@ SEXP C_deinterlace256(SEXP r) {
     r0p[i] = ri;
   }
   SEXP ans = PROTECT(allocVector(VECSXP, 4));
-  SET_VECTOR_ELT(ans, 0, r0);
-  SET_VECTOR_ELT(ans, 1, r1);
-  SET_VECTOR_ELT(ans, 2, r2);
-  SET_VECTOR_ELT(ans, 3, r3);
+  SET_VECTOR_ELT(ans, 3, r0);
+  SET_VECTOR_ELT(ans, 2, r1);
+  SET_VECTOR_ELT(ans, 1, r2);
+  SET_VECTOR_ELT(ans, 0, r3);
   UNPROTECT(5);
   return ans;
 }

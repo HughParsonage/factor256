@@ -16,9 +16,7 @@ extern SEXP Cfactor256_in(SEXP, SEXP, SEXP);
 extern SEXP Cfactor2562logical(SEXP);
 extern SEXP Cint2factor256(SEXP);
 extern SEXP CisntSorted256(SEXP, SEXP);
-extern SEXP CisSorted_d(SEXP, SEXP);
 extern SEXP Clogical2factor256(SEXP);
-extern SEXP CSortFw16(SEXP, SEXP);
 extern SEXP CStackMatch(SEXP, SEXP);
 extern SEXP Ctabulate256(SEXP);
 
@@ -31,9 +29,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"Cfactor2562logical", (DL_FUNC) &Cfactor2562logical, 1},
     {"Cint2factor256",     (DL_FUNC) &Cint2factor256,     1},
     {"CisntSorted256",     (DL_FUNC) &CisntSorted256,     2},
-    {"CisSorted_d",        (DL_FUNC) &CisSorted_d,        2},
     {"Clogical2factor256", (DL_FUNC) &Clogical2factor256, 1},
-    {"CSortFw16",          (DL_FUNC) &CSortFw16,          2},
     {"CStackMatch",        (DL_FUNC) &CStackMatch,        2},
     {"Ctabulate256",       (DL_FUNC) &Ctabulate256,       1},
     {NULL, NULL, 0}

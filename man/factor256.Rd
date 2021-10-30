@@ -43,6 +43,9 @@ tabulate256(f)
 
 \item{f}{A raw vector of class \code{factor256}.}
 
+\item{strictly}{If \code{TRUE} then if \code{x[i] == x[j]} and \code{i != j}
+then \code{x} is not sorted.}
+
 \item{tbl}{The table of values to lookup in \code{f}. May be a \code{factor256}
 class but will be implicitly converted based on the levels of \code{f}.}
 }
