@@ -12,5 +12,6 @@
 #define NA_INT -2147483648
 
 void vminmax_i(int ans[2], const int * xp, R_xlen_t N);
+SEXP ScalarLength(R_xlen_t o);
 
 #endif

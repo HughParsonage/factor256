@@ -2,7 +2,6 @@
 
 S3method("[",factor256)
 S3method(anyNA,factor256)
-S3method(is.unsorted,factor256)
 S3method(levels,factor256)
 export(as_factor)
 export(factor256)

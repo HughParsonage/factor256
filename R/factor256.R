@@ -157,12 +157,12 @@ is.factor256 <- function(x) {
   o
 }
 
-#' @method is.unsorted factor256
-#' @export
-is.unsorted.factor256 <- function(x, strictly = FALSE, ...) {
-  o <- .Call("CisntSorted256", x, strictly, PACKAGE = packageName())
-  as.logical(o)
-}
+## #' @method is.unsorted factor256
+## #' @export
+## is.unsorted.factor256 <- function(x, na.rm = FALSE, strictly = FALSE) {
+##   o <- .Call("CisntSorted256", x, strictly, PACKAGE = packageName())
+##   as.logical(o)
+## }
 
 
 #' @export
@@ -266,9 +266,6 @@ unique_raw <- function(x) {
   as.raw(0:255)[tx > 0]
 }
 
-nonDuplicated <- function(x, h) {
-  .Call("C_nonDuplicated", x, h, PACKAGE = packageName())
-}
 
 
 interlace256 <- function(x, y, z, w) {
@@ -284,6 +281,21 @@ interlace256 <- function(x, y, z, w) {
 
 deinterlace256 <- function(r, new_names = paste0("r", 0:3)) {
   .Call("C_deinterlace256", r, PACKAGE = packageName())
+}
+
+isntSortedFw16 <- function(x, d = 0L) {
+  .Call("CisSorted_d", x, d, PACKAGE = packageName())
+}
+
+SortFw16 <- function(x, d = 0L) {
+  # c(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 10L, 11L, 12L, 13L, 16L, 17L,
+  #   18L, 21L, 22L, 23L, 25L, 26L, 27L, 28L, 29L, 30L, 31L, 32L, 33L,
+  #   34L, 35L, 36L)
+
+  for (.d in d) {
+    x <- .Call("CSortFw16", x, .d, PACKAGE = packageName())
+  }
+  x
 }
 
 

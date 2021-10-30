@@ -38,37 +38,6 @@ SEXP CisntSorted256(SEXP x, SEXP strictly) {
   return ScalarLength(isntSorted256(x, s));
 }
 
-R_xlen_t nonDuplicated(SEXP x, SEXP h) {
-  // ensure for every hash
-  const SEXP * xp = STRING_PTR(x);
-  const int * hp = INTEGER(h);
-
-  R_xlen_t N = xlength(x);
-  if (xlength(h) != N) {
-    return 1;
-  }
-  SEXP ux = PROTECT(allocVector(STRSXP, 256));
-  SEXP * uxp = STRING_PTR(ux);
-  for (int j = 0; j < 256; ++j) {
-    uxp[j] = NA_STRING;
-  }
-  R_xlen_t o = 0;
-  for (R_xlen_t i = 0; i < N; ++i) {
-    int h256 = hp[i] & 255;
-    if (uxp[h256] != NA_STRING && uxp[h256] != xp[i]) {
-      o = i + 1;
-      break;
-    }
-    uxp[h256] = xp[i];
-  }
-  UNPROTECT(1);
-  return o;
-}
-
-SEXP C_nonDuplicated(SEXP x, SEXP h) {
-  R_xlen_t o = nonDuplicated(x, h);
-  return o <= INT_MAX ? ScalarInteger(o) : ScalarReal(o);
-}
 
 
 SEXP BSearch(SEXP aa, SEXP xx) {

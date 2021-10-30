@@ -57,10 +57,14 @@ expect_equal(!(cc %in% c("foo", "Ferrari Dino", "Volvo 142E")),
 library(utils)
 expect_equal(head(cc), recompose256(head(cc_f256)))
 expect_equal(tail(cc), recompose256(tail(cc_f256)))
-
-expect_true(is.unsorted(factor256(c("A", "A", "B", "A"), levels = LETTERS)))
-expect_false(is.unsorted(factor256(c("A", "A", "B", "C"), levels = LETTERS)))
-expect_true(is.unsorted(factor256(c("A", "A", "B", "C"), levels = LETTERS), strictly = TRUE))
+#
+ffaabc <- factor256(c("A", "A", "B", "C"), levels = LETTERS)
+expect_true(as.logical(isntSorted256(factor256(c("A", "A", "B", "A"), levels = LETTERS))))
+expect_equal(isntSorted256(factor256(c("A", "A", "B")), strictly = TRUE), 2L)
+expect_equal(isntSorted256(factor256(c("A", "A", "B")), strictly = FALSE), 0L)
+expect_equal(isntSorted256(factor256(c("A"))), 0L)
+# expect_false(is.unsorted(ffaabc)))
+# expect_true(is.unsorted(ffaabc, strictly = TRUE))
 
 
 
