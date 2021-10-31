@@ -40,7 +40,7 @@ mtcars_rownames <-
     "Fiat X1-9", "Porsche 914-2", "Lotus Europa", "Ford Pantera L",
     "Ferrari Dino", "Maserati Bora", "Volvo 142E")
 
-cc <- sample(mtcars_rownames, size = 99, replace = TRUE)
+cc <- c(sample(mtcars_rownames), sample(mtcars_rownames, size = 99, replace = TRUE))
 cc_f256 <- factor256(cc)
 expect_equal(cc %in% c("foo", "Ferrari Dino", "Volvo 142E"),
              factor256_in(cc_f256, c("foo", "Ferrari Dino", "Volvo 142E")))
