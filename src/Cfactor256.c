@@ -38,38 +38,6 @@ SEXP CisntSorted256(SEXP x, SEXP strictly) {
   return ScalarLength(isntSorted256(x, s));
 }
 
-
-
-SEXP BSearch(SEXP aa, SEXP xx) {
-  //
-  int * xp = INTEGER(xx);
-  int * ap = INTEGER(aa);
-  R_xlen_t N = xlength(aa);
-  int n = length(xx);
-  if (n >= 256) {
-    return R_NilValue;
-  }
-  SEXP ans = PROTECT(allocVector(RAWSXP, N));
-  unsigned char * restrict ansp = RAW(ans);
-  int g[256] = {0};
-  for (int j = 0; j < n; ++j) {
-    g[j] = xp[j];
-  }
-  for (R_xlen_t i = 0; i < N; ++i) {
-    ansp[i] = 0;
-    int api = ap[i];
-    for (int j = 1; j < 256; ++j) {
-      if (api == g[j]) {
-        ansp[i] = j;
-        break;
-      }
-    }
-    // ansp[i] = binary_find(ap[i], xp, n);
-  }
-  UNPROTECT(1);
-  return ans;
-}
-
 SEXP CStackMatch(SEXP x, SEXP ux) {
   // match(x, ux, nomatch = 0L) but type raw
   if (!isInteger(x) || !isInteger(ux)) {
@@ -443,40 +411,7 @@ SEXP C_rank256(SEXP x, SEXP DoOrder) {
 
 
 
-void bead_sort(int *a, int len) {
-  int i, j, max, sum;
-  unsigned char *beads;
-#	define BEAD(i, j) beads[i * max + j]
 
-  for (i = 1, max = a[0]; i < len; i++) {
-    if (a[i] > max) max = a[i];
-  }
-
-  beads = calloc(1, max * len);
-
-  /* mark the beads */
-  for (i = 0; i < len; i++) {
-    for (j = 0; j < a[i]; j++) {
-      BEAD(i, j) = 1;
-    }
-  }
-
-  for (j = 0; j < max; j++) {
-    /* count how many beads are on each post */
-    for (sum = i = 0; i < len; i++) {
-      sum += BEAD(i, j);
-      BEAD(i, j) = 0;
-    }
-    /* mark bottom sum beads */
-    for (i = len - sum; i < len; i++) BEAD(i, j) = 1;
-  }
-
-  for (i = 0; i < len; i++) {
-    for (j = 0; j < max && BEAD(i, j); j++);
-    a[i] = j;
-  }
-  free(beads);
-}
 
 unsigned int interlace(unsigned char x, unsigned char y, unsigned char z, unsigned char w) {
   unsigned int o = x;
