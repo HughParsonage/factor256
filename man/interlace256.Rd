@@ -3,17 +3,28 @@
 \name{interlace256}
 \alias{interlace256}
 \alias{deinterlace256}
+\alias{interlace256_columns}
+\alias{deinterlace256_columns}
 \title{Interlace raw vectors}
 \usage{
 interlace256(w, x, y = NULL, z = NULL)
 
 deinterlace256(u)
+
+interlace256_columns(DT, new_colnames = 1L)
+
+deinterlace256_columns(DT, new_colnames = 1L)
 }
 \arguments{
 \item{w, x, y, z}{Raw vectors. A vector may be \code{NULL} if fewer than four
 vectors need to be compressed.}
 
 \item{u}{An integer vector.}
+
+\item{DT}{A \code{data.frame} containing raw vectors to be interlaced.}
+
+\item{new_colnames}{A mechanism for producing the new columns. Currently only
+\code{1L} is implemented, the default mechanism.}
 }
 \value{
 \code{interlace256} Return an integer vector, compressing raw vectors.

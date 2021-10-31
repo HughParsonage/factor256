@@ -12,4 +12,6 @@ Encoding: UTF-8
 RoxygenNote: 7.1.1
 Imports: 
     utils
-Suggests: tinytest
+Suggests: 
+    data.table,
+    tinytest

@@ -63,12 +63,7 @@ expect_true(as.logical(isntSorted256(factor256(c("A", "A", "B", "A"), levels = L
 expect_equal(isntSorted256(factor256(c("A", "A", "B")), strictly = TRUE), 2L)
 expect_equal(isntSorted256(factor256(c("A", "A", "B")), strictly = FALSE), 0L)
 expect_equal(isntSorted256(factor256(c("A"))), 0L)
-# expect_false(is.unsorted(ffaabc)))
-# expect_true(is.unsorted(ffaabc, strictly = TRUE))
 
-
-
-# expect_equal(sum_equal(State1, "NSW"), 2)
 
 
 
