@@ -251,8 +251,8 @@ SEXP Ctabulate256_levels(SEXP x, SEXP Nmax, SEXP dotInterval) {
   // Returns a vector of length 256 equivalent to table(x) but additionally
   // stops when the table reaches Nmax counts, which are checked every
   //
-  if (isntRaw(x)) {
-    return R_NilValue;
+  if (isntRaw(x) || !isInteger(Nmax) || !isInteger(dotInterval)) {
+    return R_NilValue; // # nocov
   }
   const int nmax = asInteger(Nmax);
   const unsigned int interval = nxt_2pwr(asInteger(dotInterval));

@@ -1,5 +1,7 @@
 #' Factors of fewer than 256 elements
 #' @importFrom utils packageName
+#' @importFrom utils head
+#' @importFrom utils tail
 #' @useDynLib factor256, .registration=TRUE
 #'
 #' @description Whereas base R's factors as based on 32-bit integer vectors,
@@ -14,6 +16,10 @@
 #'
 #' @param strictly If \code{TRUE} then if \code{x[i] == x[j]} and \code{i != j}
 #' then \code{x} is not sorted.
+#'
+#' @param nmax,dotInterval (\code{tabulate256_levels} only). Every \code{dotInterval}
+#' iterations through \code{x} check number of unique elements detected so far. If any count exceeds
+#' \code{nmax} the rest of the vector is ignored.
 #'
 #' @return
 #' \code{factor256} is a class based on raw vectors.
@@ -31,7 +37,12 @@
 #' \item{\code{tabulate256}}{Takes a raw vector and counts the number of times
 #' each element occurs within it. It is always length-256; if an element is absent
 #' it will have value zero in the output.}
+#' \item{\code{tabulate256_levels}}{Similar to \code{tabulate256} but with optional arguments \code{nmax},
+#' \code{dotInterval}.}
 #' \item{\code{as_factor}}{Converts from \code{factor256} to \code{factor}.}
+#' \item{\code{order256}}{Same as \code{order} but supports raw vectors. \code{order256(x)}}
+#' \item{\code{rank256}}{Same as \code{rank} with \code{ties.method = "first"} but supports raw vectors.}
+#' \item{\code{unique256}}{Unique elements of.}
 #'
 #' }
 #'
@@ -45,6 +56,7 @@
 #'
 #' gletters <- factor256(rep(letters, 1:26), levels = letters[1:25])
 #' tail(tabulate256(gletters))
+#' tabulate256_levels(gletters, nmax = 5L, dotInterval = 1L)
 
 #'
 #'
@@ -217,7 +229,7 @@ factor256_ein <- function(x, tbl) {
   }
 
   tbl256 <- factor256(tbl, levels(x))
-  ux <- unique_raw(x)
+  ux <- unique256(x)
   for (j in seq_along(tbl)) {
     if (!(as.raw(tbl256[j]) %in% ux)) {
       stop("`tbl` contained ", tbl[j], ", but this value was not found in x. ",
@@ -231,8 +243,11 @@ factor256_ein <- function(x, tbl) {
 #' @export
 factor256_enotin <- function(x, tbl) {
   x <- factor256(x)
+  if (anyDuplicated(tbl)) {
+    stop("`anyDuplicated(tbl) = ", anyDuplicated(tbl), "`. Remove duplicate elements from tbl.")
+  }
   tbl256 <- factor256(tbl, levels(x))
-  ux <- unique_raw(x)
+  ux <- unique256(x)
   for (j in seq_along(tbl)) {
     if (!(as.raw(tbl256[j]) %in% ux)) {
       stop("`tbl` contained ", tbl[j], ", but this value was not found in x. ",
@@ -249,13 +264,17 @@ tabulate256 <- function(f) {
   .Call("Ctabulate256", f, PACKAGE = packageName())
 }
 
+#' @rdname factor256
+#' @export
 rank256 <- function(x) {
   if (!is.raw(x)) {
-    return(order(x))
+    return(rank(x, ties.method = "first"))
   }
   .Call("C_rank256", x, FALSE, PACKAGE = packageName())
 }
 
+#' @rdname factor256
+#' @export
 order256 <- function(x) {
   if (!is.raw(x)) {
     return(order(x))
@@ -263,10 +282,21 @@ order256 <- function(x) {
   .Call("C_rank256", x, TRUE, PACKAGE = packageName())
 }
 
-unique_raw <- function(x) {
+#' @rdname factor256
+#' @export
+unique256 <- function(x) {
   stopifnot(is.raw(x))
   tx <- tabulate256(x)
   as.raw(0:255)[tx > 0]
+}
+
+#' @rdname factor256
+#' @export
+tabulate256_levels <- function(x, nmax = NULL, dotInterval = 65535L) {
+  if (!is.integer(nmax)) {
+    nmax <- 256L
+  }
+  .Call("Ctabulate256_levels", x, nmax = nmax, dotInterval = dotInterval, PACKAGE = packageName())
 }
 
 

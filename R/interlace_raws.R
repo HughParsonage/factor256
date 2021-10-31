@@ -27,17 +27,17 @@ deinterlace256 <- function(u) {
 #' @export
 interlace256_columns <- function(DT, new_colnames = 1L) {
   if (!requireNamespace("data.table", quietly = TRUE)) {
-    stop("Package data.table is required for interlace256_column")
+    stop("Package data.table is required for interlace256_column") # nocov
   }
   stopifnot(is.data.frame(DT))
-  if (!is.data.table(DT)) {
+  if (!data.table::is.data.table(DT)) {
     DT <- data.table::as.data.table(DT)
   }
   raw_cols <- names(DT)[vapply(DT, is.raw, NA)]
   if (length(raw_cols) <= 1L) {
     if (length(raw_cols) == 1L) {
       data.table::set(DT, j = raw_cols, value = as.integer(.subset2(DT, raw_cols)))
-      setnames(DT, raw_cols, paste0("I256-", raw_cols))
+      data.table::setnames(DT, raw_cols, paste0("I256-", raw_cols))
     }
     return(DT)
   }
@@ -59,7 +59,10 @@ interlace256_columns <- function(DT, new_colnames = 1L) {
 #' @rdname interlace256
 #' @export
 deinterlace256_columns <- function(DT, new_colnames = 1L) {
-  likely_rawcols <- (copy(names(DT)[startsWith(names(DT), "I256-")]))
+  likely_rawcols <- (data.table::copy(names(DT)[startsWith(names(DT), "I256-")]))
+  if (!length(likely_rawcols)) {
+    return(DT)
+  }
   for (j in seq_along(likely_rawcols)) {
     nom_j <- likely_rawcols[j]
     noms_j <- rev(tail(strsplit(nom_j, split = "-", fixed = TRUE)[[1L]], -1L))

@@ -3,6 +3,7 @@ library(factor256)
 
 if (requireNamespace("data.table", quietly = TRUE)) {
   library(data.table)
+
   for (nc in 1:13) {
     DT <- lapply(1:nc, function(z) {
       if (z == (nc %/% 2L)) {
@@ -21,4 +22,13 @@ if (requireNamespace("data.table", quietly = TRUE)) {
 
   }
 }
+
+DF <- lapply(1:7, function(x) sample.int(8, size = 8, replace = TRUE))
+
+DF <- setNames(as.data.frame(DF), paste0("Z", 1:7))
+ans <- deinterlace256_columns(interlace256_columns(DF))
+ans <- as.data.frame(ans)
+expect_equal(ans, DF)
+
+
 

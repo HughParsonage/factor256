@@ -12,6 +12,10 @@
 \alias{factor256_ein}
 \alias{factor256_enotin}
 \alias{tabulate256}
+\alias{rank256}
+\alias{order256}
+\alias{unique256}
+\alias{tabulate256_levels}
 \title{Factors of fewer than 256 elements}
 \usage{
 factor256(x, levels = NULL)
@@ -35,6 +39,14 @@ factor256_ein(x, tbl)
 factor256_enotin(x, tbl)
 
 tabulate256(f)
+
+rank256(x)
+
+order256(x)
+
+unique256(x)
+
+tabulate256_levels(x, nmax = NULL, dotInterval = 65535L)
 }
 \arguments{
 \item{x}{An atomic vector with fewer than 256 elements.}
@@ -48,6 +60,10 @@ then \code{x} is not sorted.}
 
 \item{tbl}{The table of values to lookup in \code{f}. May be a \code{factor256}
 class but will be implicitly converted based on the levels of \code{f}.}
+
+\item{nmax, dotInterval}{(\code{tabulate256_levels} only). Every \code{dotInterval}
+iterations through \code{x} check number of unique elements detected so far. If any count exceeds
+\code{nmax} the rest of the vector is ignored.}
 }
 \value{
 \code{factor256} is a class based on raw vectors.
@@ -65,7 +81,12 @@ none of the values of \code{tbl} are present in \code{f}.}
 \item{\code{tabulate256}}{Takes a raw vector and counts the number of times
 each element occurs within it. It is always length-256; if an element is absent
 it will have value zero in the output.}
+\item{\code{tabulate256_levels}}{Similar to \code{tabulate256} but with optional arguments \code{nmax},
+\code{dotInterval}.}
 \item{\code{as_factor}}{Converts from \code{factor256} to \code{factor}.}
+\item{\code{order256}}{Same as \code{order} but supports raw vectors. \code{order256(x)}}
+\item{\code{rank256}}{Same as \code{rank} with \code{ties.method = "first"} but supports raw vectors.}
+\item{\code{unique256}}{Unique elements of.}
 
 }
 }
@@ -83,6 +104,7 @@ head(recompose256(fletters))
 
 gletters <- factor256(rep(letters, 1:26), levels = letters[1:25])
 tail(tabulate256(gletters))
+tabulate256_levels(gletters, nmax = 5L, dotInterval = 1L)
 
 
 }

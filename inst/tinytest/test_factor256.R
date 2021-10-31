@@ -47,22 +47,53 @@ expect_equal(cc %in% c("foo", "Ferrari Dino", "Volvo 142E"),
 expect_equal(!(cc %in% c("foo", "Ferrari Dino", "Volvo 142E")),
              factor256_notin(cc_f256, c("foo", "Ferrari Dino", "Volvo 142E")))
 expect_error(factor256_ein(cc_f256, c("foo", "Ferrari Dino", "Volvo 142E")))
+expect_error(factor256_ein(cc_f256, rep(c("Ferrari Dino", "Volvo 142E"), 2)), "duplicate")
 expect_error(factor256_enotin(cc_f256, c("foo", "Ferrari Dino", "Volvo 142E")))
+expect_error(factor256_enotin(cc_f256, rep(c("Ferrari Dino", "Volvo 142E"), 2)), "duplicate")
 
 expect_equal(cc %in% c("Ferrari Dino", "Volvo 142E"),
              factor256_ein(cc_f256, c("Ferrari Dino", "Volvo 142E")))
 expect_equal(!(cc %in% c("foo", "Ferrari Dino", "Volvo 142E")),
              factor256_enotin(cc_f256, c("Ferrari Dino", "Volvo 142E")))
 
+expect_error(factor256(1:1000), "1000")
+expect_error(factor256(1:1000, levels = 1:1000), "1000")
+expect_error(factor256(LETTERS, levels = c(LETTERS, LETTERS)), "duplicated")
+expect_error(factor256(LETTERS, levels = double(100)), "levels.*double")
+expect_true(!anyNA(factor256(LETTERS)))
+
+
 library(utils)
 expect_equal(head(cc), recompose256(head(cc_f256)))
 expect_equal(tail(cc), recompose256(tail(cc_f256)))
+expect_error(recompose256(1:10), "factor256")
+
 #
 ffaabc <- factor256(c("A", "A", "B", "C"), levels = LETTERS)
 expect_true(as.logical(isntSorted256(factor256(c("A", "A", "B", "A"), levels = LETTERS))))
 expect_equal(isntSorted256(factor256(c("A", "A", "B")), strictly = TRUE), 2L)
 expect_equal(isntSorted256(factor256(c("A", "A", "B")), strictly = FALSE), 0L)
 expect_equal(isntSorted256(factor256(c("A"))), 0L)
+
+x <- integer(10)
+r <- raw(10)
+expect_equal(order256(r), order(x))
+expect_equal(rank256(r), rank(x, ties.method = "first"))
+
+x <- rep_len(c(10:5, 3:4), 11)
+r <- as.raw(x)
+expect_equal(order256(r), order(x))
+expect_equal(order256(x), order(x))
+expect_equal(rank256(r), rank(x, ties.method = "first"))
+expect_equal(rank256(x), rank(x, ties.method = "first"))
+
+factor_ffabc <- as_factor(ffaabc)
+expect_true(is.factor(factor_ffabc))
+expect_true(is.factor(as_factor(factor(LETTERS))))
+
+x <- rep(as.raw(11:15), each = 1e6)
+expect_equal(tabulate256_levels(x), tabulate256(x))
+expect_equal(which(tabulate256_levels(x, nmax = 5L) > 0), which(tabulate256(x) > 0))
 
 
 
