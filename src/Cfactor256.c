@@ -408,21 +408,6 @@ SEXP C_rank256(SEXP x, SEXP DoOrder) {
 
 }
 
-
-
-
-
-
-unsigned int interlace(unsigned char x, unsigned char y, unsigned char z, unsigned char w) {
-  unsigned int o = x;
-  o <<= 8;
-  o += y;
-  o <<= 8;
-  o += z;
-  o <<= 8;
-  return o + w;
-}
-
 SEXP C_interlace256_wx(SEXP w, SEXP x) {
   R_xlen_t N = xlength(w);
   const unsigned char * wp = RAW(w);
@@ -433,6 +418,7 @@ SEXP C_interlace256_wx(SEXP w, SEXP x) {
     unsigned int o = wp[i];
     o <<= 8;
     o += xp[i];
+    o <<= 16;
     ansp[i] = o;
   }
   UNPROTECT(1);
@@ -452,6 +438,7 @@ SEXP C_interlace256_wxy(SEXP w, SEXP x, SEXP y) {
     o += xp[i];
     o <<= 8;
     o += yp[i];
+    o <<= 8;
     ansp[i] = o;
   }
   UNPROTECT(1);
@@ -546,10 +533,10 @@ SEXP C_deinterlace256(SEXP r) {
     r0p[i] = ri;
   }
   SEXP ans = PROTECT(allocVector(VECSXP, 4));
-  SET_VECTOR_ELT(ans, 3, r0);
-  SET_VECTOR_ELT(ans, 2, r1);
-  SET_VECTOR_ELT(ans, 1, r2);
-  SET_VECTOR_ELT(ans, 0, r3);
+  SET_VECTOR_ELT(ans, 0, r0);
+  SET_VECTOR_ELT(ans, 1, r1);
+  SET_VECTOR_ELT(ans, 2, r2);
+  SET_VECTOR_ELT(ans, 3, r3);
   UNPROTECT(5);
   return ans;
 }

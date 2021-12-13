@@ -65,9 +65,13 @@ deinterlace256_columns <- function(DT, new_colnames = 1L) {
   }
   for (j in seq_along(likely_rawcols)) {
     nom_j <- likely_rawcols[j]
-    noms_j <- rev(tail(strsplit(nom_j, split = "-", fixed = TRUE)[[1L]], -1L))
+    noms_j <- (tail(strsplit(nom_j, split = "-", fixed = TRUE)[[1L]], -1L))
+    if (length(noms_j) == 1) {
+      data.table::set(DT, j = noms_j, value = as.raw(.subset2(DT, nom_j)))
+      next
+    }
     List <- deinterlace256(.subset2(DT, nom_j))
-    for (k in rev(seq_along(noms_j))) {
+    for (k in (seq_along(noms_j))) {
       data.table::set(DT, j = noms_j[k], value = List[[k]])
     }
   }

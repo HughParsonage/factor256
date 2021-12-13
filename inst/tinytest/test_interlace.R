@@ -1,34 +1,45 @@
 library(tinytest)
 library(factor256)
 
-if (requireNamespace("data.table", quietly = TRUE)) {
-  library(data.table)
+expect_error(interlace256(1L, 1L), "integer")
+expect_error(interlace256(as.raw(1), 1), "double")
+expect_error(interlace256(as.raw(1), as.raw(1), "f"), "character")
+expect_error(interlace256(as.raw(1), as.raw(1), as.raw(1), 1 + 1i), "complex")
+expect_equal(deinterlace256(interlace256(as.raw(1:5), raw(5))), list(as.raw(1:5), raw(5), raw(5), raw(5)))
 
-  for (nc in 1:13) {
-    DT <- lapply(1:nc, function(z) {
-      if (z == (nc %/% 2L)) {
-        return(1:10)
-      }
-      as.raw(rep_len(rpois(11, z), 10))
-    })
-    setDT(DT)
-    DT1_orig <- copy(DT)
-    orig_noms <- copy(names(DT))
-    ans <- deinterlace256_columns(interlace256_columns(DT))
-
-    setcolorder(ans, orig_noms)
-    expect_equal(ans,
-                 DT1_orig)
-
-  }
-}
 
 DF <- lapply(1:7, function(x) sample.int(8, size = 8, replace = TRUE))
 
 DF <- setNames(as.data.frame(DF), paste0("Z", 1:7))
-ans <- deinterlace256_columns(interlace256_columns(DF))
-ans <- as.data.frame(ans)
+ans <- DF
+if (requireNamespace("data.table", quietly = TRUE)) {
+  ans <- deinterlace256_columns(interlace256_columns(DF))
+  ans <- as.data.frame(ans)
+}
 expect_equal(ans, DF)
+
+DF <- lapply(1:7, function(x) as.raw(sample.int(8, size = 8, replace = TRUE)))
+
+DF <- setNames(as.data.frame(DF), paste0("Z", 1:7))
+ans <- DF
+if (requireNamespace("data.table", quietly = TRUE)) {
+  ans <- deinterlace256_columns(interlace256_columns(DF))
+  ans <- as.data.frame(ans)
+}
+expect_equal(ans, DF)
+
+DF <- lapply(1:9, function(x) as.raw(sample.int(8, size = 8, replace = TRUE)))
+
+DF <- setNames(as.data.frame(DF), paste0("Z", 1:9))
+ans <- DF
+if (requireNamespace("data.table", quietly = TRUE)) {
+  ans <- deinterlace256_columns(interlace256_columns(DF))
+  ans <- as.data.frame(ans)
+  data.table::setcolorder(ans, paste0("Z", 1:9))
+}
+expect_equal(ans, DF)
+
+
 
 
 
