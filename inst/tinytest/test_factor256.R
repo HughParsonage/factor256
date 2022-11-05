@@ -95,7 +95,8 @@ x <- rep(as.raw(11:15), each = 1e6)
 expect_equal(tabulate256_levels(x), tabulate256(x))
 expect_equal(which(tabulate256_levels(x, nmax = 5L) > 0), which(tabulate256(x) > 0))
 
-
+x <- factor256(1:10, labels = letters[1:10])
+expect_equal(factor256_in(x, "a"), 1:10 == 1)
 
 
 

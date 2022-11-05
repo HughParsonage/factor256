@@ -5,10 +5,15 @@
 #' @useDynLib factor256, .registration=TRUE
 #'
 #' @description Whereas base R's factors as based on 32-bit integer vectors,
-#' \code{factor256} uses 8-bit raw vectors to minimize memory footprints
+#' \code{factor256} uses 8-bit raw vectors to minimize memory footprints.
 #'
-#' @param x An atomic vector with fewer than 256 elements.
+#' @param x An atomic vector with fewer than 256 unique elements.
 #' @param levels An optional vector of the unique values of \code{x}.
+#' @param labels An optional character vector as the labels to be used. To be used
+#' if, for example, the \code{levels(x)} are themselves an encoding.
+#'
+#' @param object A \code{factor256} object for which the \code{labels} are desired.
+#' @param ... Not used.
 #'
 #' @param f A raw vector of class \code{factor256}.
 #' @param tbl The table of values to lookup in \code{f}. May be a \code{factor256}
@@ -62,7 +67,7 @@
 #'
 #' @export
 
-factor256 <- function(x, levels = NULL) {
+factor256 <- function(x, levels = NULL, labels = NULL) {
   if (inherits(x, "factor256")) {
     return(x)
   }
@@ -87,15 +92,27 @@ factor256 <- function(x, levels = NULL) {
            "appears at positions ", which(levels == dup_ele), ". ",
            "All elements of `levels` must be unique.")
     }
-
   }
+  if (is.null(labels)) {
+    labels <- levels
+  } else {
+    if (!is.character(labels)) {
+      stop("`labels` was type '", typeof(labels), "' but must be a character vector.")
+    }
+    if (length(labels) != length(levels)) {
+      stop("`length(labels) = ", length(labels), "` but must be the as `length(levels) = ", length(levels), "`.")
+    }
+  }
+
   ans <-
     switch(typeof(x),
+           "raw" = raw2factor256(x, levels),
            "logical" = logical2factor256(x, levels),
            "integer" = integer2factor256(x, levels),
            "character" = character2factor256(x, levels))
   class(ans) <- "factor256"
   attr(ans, "factor256_levels") <- levels
+  attr(ans, "factor256_labels") <- labels
   ans
 }
 
@@ -117,6 +134,10 @@ recompose256 <- function(f) {
 
 logical2factor256 <- function(x, levels = NULL) {
   ans <- .Call("Clogical2factor256", x, PACKAGE = packageName())
+}
+
+raw2factor256 <- function(x, levels) {
+  .Call("C_raw2factor256", x, levels, PACKAGE = packageName())
 }
 
 integer2factor256 <- function(x, levels) {
@@ -154,6 +175,12 @@ StackMatch <- function(x, ux = NULL) {
 #' @export
 levels.factor256 <- function(x) {
   attr(x, "factor256_levels")
+}
+
+#' @rdname factor256
+#' @export
+labels.factor256 <- function(object, ...) {
+  attr(object, "factor256_labels")
 }
 
 #' @rdname factor256
@@ -208,6 +235,13 @@ as_factor <- function(x) {
 #' @export
 factor256_in <- function(x, tbl) {
   x <- factor256(x)
+
+  # Want to support using the labels for %in%
+  if (is.character(tbl) && !is.character(levels(x)) && is.character(labels(x))) {
+    tbl <- factor256(levels(x)[match(tbl, labels(x), nomatch = 0L)],
+                     levels = levels(x),
+                     labels = labels(x))
+  }
   tbl <- factor256(tbl, levels(x))
   .Call("Cfactor256_in", x, tbl, FALSE, PACKAGE = packageName())
 }

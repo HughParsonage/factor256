@@ -12,6 +12,7 @@ extern SEXP C_asInteger0(SEXP);
 extern SEXP C_deinterlace256(SEXP);
 extern SEXP C_interlace256(SEXP, SEXP, SEXP, SEXP);
 extern SEXP C_rank256(SEXP, SEXP);
+extern SEXP C_raw2factor256(SEXP, SEXP);
 extern SEXP Cfactor256_in(SEXP, SEXP, SEXP);
 extern SEXP Cfactor2562logical(SEXP);
 extern SEXP Cint2factor256(SEXP);
@@ -26,6 +27,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"C_deinterlace256",    (DL_FUNC) &C_deinterlace256,    1},
     {"C_interlace256",      (DL_FUNC) &C_interlace256,      4},
     {"C_rank256",           (DL_FUNC) &C_rank256,           2},
+    {"C_raw2factor256",     (DL_FUNC) &C_raw2factor256,     2},
     {"Cfactor256_in",       (DL_FUNC) &Cfactor256_in,       3},
     {"Cfactor2562logical",  (DL_FUNC) &Cfactor2562logical,  1},
     {"Cint2factor256",      (DL_FUNC) &Cint2factor256,      1},

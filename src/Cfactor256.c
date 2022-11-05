@@ -124,6 +124,32 @@ SEXP Cint2factor256(SEXP x) {
   return ans;
 }
 
+SEXP C_raw2factor256(SEXP x, SEXP Levels) {
+  if (isntRaw(x) || isntRaw(Levels)) {
+    error("(C_raw2factor256): x or levels not raw.");
+  }
+  R_xlen_t N = xlength(x);
+  int nl = length(Levels);
+  const unsigned char * lp = RAW(Levels);
+  unsigned char lookup[256] = {0};
+  for (int j = 0; j < 256; ++j) {
+    for (int k = 0; k < nl; ++k) {
+      int lpk = lp[k];
+      if (lpk == j) {
+        lookup[j] = k;
+      }
+    }
+  }
+  const unsigned char * xp = RAW(x);
+  SEXP ans = PROTECT(allocVector(RAWSXP, N));
+  unsigned char * ansp = RAW(ans);
+  for (R_xlen_t i = 0; i < N; ++i) {
+    ansp[i] = lookup[xp[i]] + 1;
+  }
+  UNPROTECT(1);
+  return ans;
+}
+
 
 SEXP Cfactor256_in(SEXP x, SEXP tbl, SEXP Not) {
   // Not

@@ -4,6 +4,7 @@
 \alias{factor256}
 \alias{recompose256}
 \alias{levels.factor256}
+\alias{labels.factor256}
 \alias{is.factor256}
 \alias{isntSorted256}
 \alias{as_factor}
@@ -18,11 +19,13 @@
 \alias{tabulate256_levels}
 \title{Factors of fewer than 256 elements}
 \usage{
-factor256(x, levels = NULL)
+factor256(x, levels = NULL, labels = NULL)
 
 recompose256(f)
 
 \method{levels}{factor256}(x)
+
+\method{labels}{factor256}(object, ...)
 
 is.factor256(x)
 
@@ -49,11 +52,18 @@ unique256(x)
 tabulate256_levels(x, nmax = NULL, dotInterval = 65535L)
 }
 \arguments{
-\item{x}{An atomic vector with fewer than 256 elements.}
+\item{x}{An atomic vector with fewer than 256 unique elements.}
 
 \item{levels}{An optional vector of the unique values of \code{x}.}
 
+\item{labels}{An optional character vector as the labels to be used. To be used
+if, for example, the \code{levels(x)} are themselves an encoding.}
+
 \item{f}{A raw vector of class \code{factor256}.}
+
+\item{object}{A \code{factor256} object for which the \code{labels} are desired.}
+
+\item{...}{Not used.}
 
 \item{strictly}{If \code{TRUE} then if \code{x[i] == x[j]} and \code{i != j}
 then \code{x} is not sorted.}
@@ -92,7 +102,7 @@ it will have value zero in the output.}
 }
 \description{
 Whereas base R's factors as based on 32-bit integer vectors,
-\code{factor256} uses 8-bit raw vectors to minimize memory footprints
+\code{factor256} uses 8-bit raw vectors to minimize memory footprints.
 }
 \examples{
 f10 <- factor256(1:10)
