@@ -2,8 +2,10 @@
 
 S3method("[",factor256)
 S3method(anyNA,factor256)
+S3method(format,factor256)
 S3method(labels,factor256)
 S3method(levels,factor256)
+S3method(print,factor256)
 export(as_factor)
 export(deinterlace256)
 export(deinterlace256_columns)

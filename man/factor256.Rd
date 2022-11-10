@@ -4,7 +4,6 @@
 \alias{factor256}
 \alias{recompose256}
 \alias{levels.factor256}
-\alias{labels.factor256}
 \alias{is.factor256}
 \alias{isntSorted256}
 \alias{as_factor}
@@ -24,8 +23,6 @@ factor256(x, levels = NULL, labels = NULL)
 recompose256(f)
 
 \method{levels}{factor256}(x)
-
-\method{labels}{factor256}(object, ...)
 
 is.factor256(x)
 
@@ -60,10 +57,6 @@ tabulate256_levels(x, nmax = NULL, dotInterval = 65535L)
 if, for example, the \code{levels(x)} are themselves an encoding.}
 
 \item{f}{A raw vector of class \code{factor256}.}
-
-\item{object}{A \code{factor256} object for which the \code{labels} are desired.}
-
-\item{...}{Not used.}
 
 \item{strictly}{If \code{TRUE} then if \code{x[i] == x[j]} and \code{i != j}
 then \code{x} is not sorted.}

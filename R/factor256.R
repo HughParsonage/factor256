@@ -12,8 +12,6 @@
 #' @param labels An optional character vector as the labels to be used. To be used
 #' if, for example, the \code{levels(x)} are themselves an encoding.
 #'
-#' @param object A \code{factor256} object for which the \code{labels} are desired.
-#' @param ... Not used.
 #'
 #' @param f A raw vector of class \code{factor256}.
 #' @param tbl The table of values to lookup in \code{f}. May be a \code{factor256}
@@ -177,7 +175,6 @@ levels.factor256 <- function(x) {
   attr(x, "factor256_levels")
 }
 
-#' @rdname factor256
 #' @export
 labels.factor256 <- function(object, ...) {
   attr(object, "factor256_labels")
@@ -197,6 +194,16 @@ is.factor256 <- function(x) {
   attr(o, "factor256_levels") <- lvls
   class(o) <- oldClass(x)
   o
+}
+
+#' @export
+print.factor256 <- function(x, ...) {
+  print(labels(x)[as.integer(x)], ...)
+}
+
+#' @export
+format.factor256 <- function(x, ...) {
+  format(labels(x)[as.integer(x)], ...)
 }
 
 ## #' @method is.unsorted factor256
