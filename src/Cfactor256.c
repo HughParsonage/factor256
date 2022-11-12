@@ -414,20 +414,18 @@ SEXP C_rank256(SEXP x, SEXP DoOrder) {
     //   }
     // }
   } else {
-    for (int i = xmin; i <= xmax; ++i) {
-      for (int j = 0; j < N; ++j) {
-        if (xp[j] == i) {
-          ansp[j] = k + 1;
-          ++k;
-          // if (k >= N) {
-          //   break;
-          // }
-        }
-      }
-      // if (k >= N) {
-      //   break;
-      // }
+    // rank (frank(ties.method='first'))
+
+    // cumulative table
+    unsigned int CT[256] = {0};
+    for (int j = 1; j < 256; ++j) {
+      CT[j] = Table[j - 1] + CT[j - 1];
     }
+    for (int j = 0; j < N; ++j) {
+      ansp[j] = CT[xp[j]] + 1;
+      CT[xp[j]]++;
+    }
+
   }
   UNPROTECT(1);
   return ans;
