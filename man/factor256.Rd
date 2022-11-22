@@ -3,6 +3,7 @@
 \name{factor256}
 \alias{factor256}
 \alias{recompose256}
+\alias{relevel256}
 \alias{levels.factor256}
 \alias{is.factor256}
 \alias{isntSorted256}
@@ -18,9 +19,11 @@
 \alias{tabulate256_levels}
 \title{Factors of fewer than 256 elements}
 \usage{
-factor256(x, levels = NULL, labels = NULL)
+factor256(x, levels = NULL)
 
 recompose256(f)
+
+relevel256(x, levels)
 
 \method{levels}{factor256}(x)
 
@@ -51,10 +54,7 @@ tabulate256_levels(x, nmax = NULL, dotInterval = 65535L)
 \arguments{
 \item{x}{An atomic vector with fewer than 256 unique elements.}
 
-\item{levels}{An optional vector of the unique values of \code{x}.}
-
-\item{labels}{An optional character vector as the labels to be used. To be used
-if, for example, the \code{levels(x)} are themselves an encoding.}
+\item{levels}{An optional character vector of or representing the unique values of \code{x}.}
 
 \item{f}{A raw vector of class \code{factor256}.}
 

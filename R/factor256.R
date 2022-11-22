@@ -8,9 +8,7 @@
 #' \code{factor256} uses 8-bit raw vectors to minimize memory footprints.
 #'
 #' @param x An atomic vector with fewer than 256 unique elements.
-#' @param levels An optional vector of the unique values of \code{x}.
-#' @param labels An optional character vector as the labels to be used. To be used
-#' if, for example, the \code{levels(x)} are themselves an encoding.
+#' @param levels An optional character vector of or representing the unique values of \code{x}.
 #'
 #'
 #' @param f A raw vector of class \code{factor256}.
@@ -65,8 +63,12 @@
 #'
 #' @export
 
-factor256 <- function(x, levels = NULL, labels = NULL) {
+factor256 <- function(x, levels = NULL) {
   if (inherits(x, "factor256")) {
+    if (is.null(levels) || identical(levels(x), levels)) {
+      return(x)
+    }
+    attr(x, "factor256_levels") <- union(levels(x), levels)
     return(x)
   }
   stopifnot(is.atomic(x))
@@ -79,27 +81,21 @@ factor256 <- function(x, levels = NULL, labels = NULL) {
     if (length(levels) >= 256L) {
       stop("length(levels) = ", length(levels), " but must be less than 256.")
     }
-    if (typeof(levels) != typeof(x)) {
-      stop("`levels` was type ", typeof(levels), " yet `x` was type ", typeof(x), ". Not supported. ",
-           "Ensure `x` and `levels` have matching types.")
-    }
     if (anyDuplicated(levels)) {
       dup_ele <- levels[anyDuplicated(levels)]
       stop("`levels` had duplicated elements: ", dup_ele,
            # don't worry abouy efficiency of levels == dup_ele since length() < 256
-           "appears at positions ", which(levels == dup_ele), ". ",
+           "appears at positions ", toString(head(which(levels == dup_ele))), ". ",
            "All elements of `levels` must be unique.")
     }
-  }
-  if (is.null(labels)) {
-    labels <- levels
-  } else {
-    if (!is.character(labels)) {
-      stop("`labels` was type '", typeof(labels), "' but must be a character vector.")
+    if (is.character(levels) && !is.character(x) && !is.logical(x)) {
+      ux <- unique(x)
+      ans <- integer2factor256(x, ux)
+      class(ans) <- "factor256"
+      attr(ans, "factor256_levels") <- as.character(levels)
+      return(ans)
     }
-    if (length(labels) != length(levels)) {
-      stop("`length(labels) = ", length(labels), "` but must be the as `length(levels) = ", length(levels), "`.")
-    }
+
   }
 
   ans <-
@@ -107,10 +103,10 @@ factor256 <- function(x, levels = NULL, labels = NULL) {
            "raw" = raw2factor256(x, levels),
            "logical" = logical2factor256(x, levels),
            "integer" = integer2factor256(x, levels),
-           "character" = character2factor256(x, levels))
+           "character" = character2factor256(x, levels),
+           "double" = integer2factor256(x, levels))
   class(ans) <- "factor256"
-  attr(ans, "factor256_levels") <- levels
-  attr(ans, "factor256_labels") <- labels
+  attr(ans, "factor256_levels") <- as.character(levels)
   ans
 }
 
@@ -124,28 +120,43 @@ recompose256 <- function(f) {
     stop("Internal error: f was type ", typeof(f), " but type raw was expected.") # nocov
   }
   lf <- levels(f)
-  if (is.logical(lf)) {
-    return(.Call("Cfactor2562logical", f, PACKAGE = packageName()))
-  }
-  lf[as.integer0(f)]
+  switch(as.character(attr(f, "orig_type")),
+         "logical" = .Call("Cfactor2562logical", f, PACKAGE = packageName()),
+         "integer" = as.integer(lf[as.integer0(f)]),
+         "double" = as.double(lf[as.integer0(f)]),
+         "raw" = as.raw(lf)[as.integer0(f)],
+         # including character
+         lf[as.integer0(f)])
+}
+
+.orig_lgl <- function(x) {
+  attr(x, "orig_type") == "logical"
 }
 
 logical2factor256 <- function(x, levels = NULL) {
   ans <- .Call("Clogical2factor256", x, PACKAGE = packageName())
+  attr(ans, "orig_type") <- "logical"
+  ans
 }
 
 raw2factor256 <- function(x, levels) {
-  .Call("C_raw2factor256", x, levels, PACKAGE = packageName())
+  ans <- .Call("C_raw2factor256", x, levels, PACKAGE = packageName())
+  attr(ans, "orig_type") <- "raw"
+  ans
 }
 
 integer2factor256 <- function(x, levels) {
   mx <- match(x, levels, nomatch = 0L)
-  .Call("Cint2factor256", mx, PACKAGE = packageName())
+  ans <- .Call("Cint2factor256", mx, PACKAGE = packageName())
+  attr(ans, "orig_type") <- typeof(x)
+  ans
 }
 
 character2factor256 <- function(x, ux, anyNAx) {
   mx <- match(x, ux, nomatch = 0L)
   ans <- .Call("Cint2factor256", mx, PACKAGE = packageName())
+  attr(ans, "orig_type") <- "character"
+  ans
 }
 
 as.integer0 <- function(x) {
@@ -171,13 +182,40 @@ StackMatch <- function(x, ux = NULL) {
 
 #' @rdname factor256
 #' @export
+relevel256 <- function(x, levels) {
+  lx <- levels(x)
+  if (length(levels) == 1) {
+    if (levels %notin% lx) {
+      stop("`levels = ", levels, "` but must be an existing level.")
+    }
+    nl <- c(levels, setdiff(lx, levels))
+    mnl <- match(nl, lx)
+    ans <- raw2factor256(x, as.raw(mnl))
+    levels(ans) <- nl
+    return(ans)
+  }
+  if (length(levels) != length(levels(x))) {
+    stop("length(levels) = ", length(levels), ", yet length(levels(x)) = ", length(levels(x)), ". ",
+         "levels must have the same length as the levels of `x`, or length 1.")
+  }
+  nl <- levels
+  mnl <- match(nl, lx)
+  ans <- raw2factor256(x, as.raw(mnl))
+  levels(ans) <- nl
+  return(ans)
+  x
+
+}
+
+#' @rdname factor256
+#' @export
 levels.factor256 <- function(x) {
   attr(x, "factor256_levels")
 }
 
 #' @export
-labels.factor256 <- function(object, ...) {
-  attr(object, "factor256_labels")
+"levels<-.factor256" <- function(x, value) {
+  attr(x, "factor256_levels") <- value
 }
 
 #' @rdname factor256
@@ -193,17 +231,21 @@ is.factor256 <- function(x) {
   o <- as.raw(x)[i]
   attr(o, "factor256_levels") <- lvls
   class(o) <- oldClass(x)
+  attr(o, "orig_type") <- attr(x, "orig_type")
   o
 }
 
 #' @export
 print.factor256 <- function(x, ...) {
-  print(labels(x)[as.integer(x)], ...)
+  cat("factor256 ")
+  print(levels(x)[as.integer0(x)], max = 20)
+  cat("Levels[", length(levels(x)), "]: ", sep = "")
+  cat(head(levels(x)))
 }
 
 #' @export
 format.factor256 <- function(x, ...) {
-  format(labels(x)[as.integer(x)], ...)
+  format(levels(x)[as.integer(x)], ...)
 }
 
 ## #' @method is.unsorted factor256
@@ -238,18 +280,37 @@ as_factor <- function(x) {
   f
 }
 
+
+no_intertwine <- function(x, y) {
+  # x and y are levels, we don't want the order to be different
+  # and can only be different if no overlap
+  if (identical(x, y)) {
+    return(TRUE)
+  }
+  i <- 1L
+  mx <- match(x, y)
+  if (anyNA(mx)) {
+    if (all(is.na(mx))) {
+      return(TRUE)
+    }
+
+  }
+}
+
+ensure_common256 <- function(x, to) {
+  stopifnot(is.factor256(x), is.factor256(to))
+  if (identical(levels(x), levels(to))) {
+    return(x)
+  }
+  factor256(x, levels = union(levels(x), levels(to)))
+}
+
+
 #' @rdname factor256
 #' @export
 factor256_in <- function(x, tbl) {
   x <- factor256(x)
-
-  # Want to support using the labels for %in%
-  if (is.character(tbl) && !is.character(levels(x)) && is.character(labels(x))) {
-    tbl <- factor256(levels(x)[match(tbl, labels(x), nomatch = 0L)],
-                     levels = levels(x),
-                     labels = labels(x))
-  }
-  tbl <- factor256(tbl, levels(x))
+  tbl <- factor256(as.character(tbl), levels(x))
   .Call("Cfactor256_in", x, tbl, FALSE, PACKAGE = packageName())
 }
 
@@ -257,7 +318,7 @@ factor256_in <- function(x, tbl) {
 #' @export
 factor256_notin <- function(x, tbl) {
   x <- factor256(x)
-  tbl <- factor256(tbl, levels(x))
+  tbl <- factor256(as.character(tbl), levels(x))
   .Call("Cfactor256_in", x, tbl, TRUE, PACKAGE = packageName())
 }
 
@@ -269,7 +330,7 @@ factor256_ein <- function(x, tbl) {
     stop("`anyDuplicated(tbl) = ", anyDuplicated(tbl), "`. Remove duplicate elements from tbl.")
   }
 
-  tbl256 <- factor256(tbl, levels(x))
+  tbl256 <- factor256(as.character(tbl), levels(x))
   ux <- unique256(x)
   for (j in seq_along(tbl)) {
     if (!(as.raw(tbl256[j]) %in% ux)) {
@@ -340,6 +401,8 @@ tabulate256_levels <- function(x, nmax = NULL, dotInterval = 65535L) {
   .Call("Ctabulate256_levels", x, nmax = nmax, dotInterval = dotInterval, PACKAGE = packageName())
 }
 
+
+"%notin%" <- function(x, tbl) is.na(match(x, tbl))
 
 
 

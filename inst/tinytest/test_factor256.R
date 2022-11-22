@@ -59,7 +59,6 @@ expect_equal(!(cc %in% c("foo", "Ferrari Dino", "Volvo 142E")),
 expect_error(factor256(1:1000), "1000")
 expect_error(factor256(1:1000, levels = 1:1000), "1000")
 expect_error(factor256(LETTERS, levels = c(LETTERS, LETTERS)), "duplicated")
-expect_error(factor256(LETTERS, levels = double(100)), "levels.*double")
 expect_true(!anyNA(factor256(LETTERS)))
 
 
@@ -95,7 +94,7 @@ x <- rep(as.raw(11:15), each = 1e6)
 expect_equal(tabulate256_levels(x), tabulate256(x))
 expect_equal(which(tabulate256_levels(x, nmax = 5L) > 0), which(tabulate256(x) > 0))
 
-x <- factor256(1:10, labels = letters[1:10])
+x <- factor256(1:10, levels = letters[1:10])
 expect_equal(factor256_in(x, "a"), 1:10 == 1)
 
 

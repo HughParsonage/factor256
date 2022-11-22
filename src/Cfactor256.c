@@ -432,6 +432,8 @@ SEXP C_rank256(SEXP x, SEXP DoOrder) {
 
 }
 
+
+
 SEXP C_interlace256_wx(SEXP w, SEXP x) {
   R_xlen_t N = xlength(w);
   const unsigned char * wp = RAW(w);
