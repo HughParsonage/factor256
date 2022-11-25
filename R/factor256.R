@@ -85,7 +85,7 @@ factor256 <- function(x, levels = NULL) {
       dup_ele <- levels[anyDuplicated(levels)]
       stop("`levels` had duplicated elements: ", dup_ele,
            # don't worry abouy efficiency of levels == dup_ele since length() < 256
-           "appears at positions ", toString(head(which(levels == dup_ele))), ". ",
+           " appeared at positions ", toString(head(which(levels == dup_ele))), ". ",
            "All elements of `levels` must be unique.")
     }
     if (is.character(levels) && !is.character(x) && !is.logical(x)) {
@@ -404,6 +404,9 @@ tabulate256_levels <- function(x, nmax = NULL, dotInterval = 65535L) {
 
 "%notin%" <- function(x, tbl) is.na(match(x, tbl))
 
+.order <- function(...) {
+  .Call("Corder2", NULL, ..1, ..2, PACKAGE = packageName())
+}
 
 
 
