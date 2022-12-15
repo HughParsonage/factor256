@@ -404,9 +404,7 @@ tabulate256_levels <- function(x, nmax = NULL, dotInterval = 65535L) {
 
 "%notin%" <- function(x, tbl) is.na(match(x, tbl))
 
-.order <- function(...) {
-  .Call("Corder2", NULL, ..1, ..2, PACKAGE = packageName())
-}
+
 
 
 
