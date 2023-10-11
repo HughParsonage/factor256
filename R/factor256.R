@@ -4,8 +4,8 @@
 #' @importFrom utils tail
 #' @useDynLib factor256, .registration=TRUE
 #'
-#' @description Whereas base R's factors as based on 32-bit integer vectors,
-#' \code{factor256} uses 8-bit raw vectors to minimize memory footprints.
+#' @description Whereas base R's factors are based on 32-bit integer vectors,
+#' \code{factor256} uses 8-bit raw vectors to minimize its memory footprint.
 #'
 #' @param x An atomic vector with fewer than 256 unique elements.
 #' @param levels An optional character vector of or representing the unique values of \code{x}.
@@ -95,7 +95,6 @@ factor256 <- function(x, levels = NULL) {
       attr(ans, "factor256_levels") <- as.character(levels)
       return(ans)
     }
-
   }
 
   ans <-
@@ -106,7 +105,7 @@ factor256 <- function(x, levels = NULL) {
            "character" = character2factor256(x, levels),
            "double" = integer2factor256(x, levels))
   class(ans) <- "factor256"
-  attr(ans, "factor256_levels") <- as.character(levels)
+  attr(ans, "factor256_levels") <- levels
   ans
 }
 
@@ -122,8 +121,8 @@ recompose256 <- function(f) {
   lf <- levels(f)
   switch(as.character(attr(f, "orig_type")),
          "logical" = .Call("Cfactor2562logical", f, PACKAGE = packageName()),
-         "integer" = as.integer(lf[as.integer0(f)]),
-         "double" = as.double(lf[as.integer0(f)]),
+         "integer" = (lf[as.integer0(f)]),
+         "double" = (lf[as.integer0(f)]),
          "raw" = as.raw(lf)[as.integer0(f)],
          # including character
          lf[as.integer0(f)])
@@ -405,6 +404,25 @@ tabulate256_levels <- function(x, nmax = NULL, dotInterval = 65535L) {
 "%notin%" <- function(x, tbl) is.na(match(x, tbl))
 
 
+#' @name setkeyv256
+#' @title \code{setkey} for raw columns
+#' @param DT A \code{data.table}.
+#' @param cols Column names as in \code{data.table::setkeyv}
+#' @return
+#' Same as \code{data.table::setkeyv} except that raw \code{cols} will be
+#' converted to factors (as \code{data.table} does not allow raw keys).
+#' @export
+setkeyv256 <- function(DT, cols) {
+  if (requireNamespace("data.table", quietly = TRUE)) {
+    stopifnot(data.table::is.data.table(DT), is.character(cols))
+    for (j in cols) {
+      if (is.factor256(v <- .subset2(DT, j))) {
+        data.table::set(DT, j = j, value = as_factor(v))
+      }
+    }
+    data.table::setkeyv(DT, cols)
+  }
+}
 
 
 

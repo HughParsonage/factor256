@@ -94,8 +94,8 @@ it will have value zero in the output.}
 }
 }
 \description{
-Whereas base R's factors as based on 32-bit integer vectors,
-\code{factor256} uses 8-bit raw vectors to minimize memory footprints.
+Whereas base R's factors are based on 32-bit integer vectors,
+\code{factor256} uses 8-bit raw vectors to minimize its memory footprint.
 }
 \examples{
 f10 <- factor256(1:10)

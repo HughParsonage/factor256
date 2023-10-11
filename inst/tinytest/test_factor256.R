@@ -97,5 +97,8 @@ expect_equal(which(tabulate256_levels(x, nmax = 5L) > 0), which(tabulate256(x) >
 x <- factor256(1:10, levels = letters[1:10])
 expect_equal(factor256_in(x, "a"), 1:10 == 1)
 
+x <- factor256(z <- (Sys.Date() + 1:50))
+expect_equal(recompose256(x), z)
+
 
 

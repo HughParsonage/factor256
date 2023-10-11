@@ -1,0 +1,43 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# factor256
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of factor256 is to minimize the memory footprint of data analysis that
+uses categorical variables with fewer than 256 unique values.
+
+## Installation
+
+You can install the development version of factor256 from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("HughParsonage/factor256")
+```
+
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r basic-example}
+library(factor256)
+x <- factor256(LETTERS)
+typeof(x)
+identical(recompose256(x), LETTERS)
+```
+
