@@ -41,3 +41,24 @@ typeof(x)
 identical(recompose256(x), LETTERS)
 ```
 
+```{r data-example}
+library(data.table)
+DT <-
+  CJ(Year = 2000:2020,
+     State = rep_len(c("WA", "SA", "NSW", "NT", "TAS", "VIC", "QLD"), 1000),
+     Age = rep_len(0:100, 10000))
+# pryr::object_size(DT)
+# 3.36GB
+for (j in seq_along(DT)) {
+  set(DT, j = j, value = factor256(.subset2(DT, j)))
+}
+# pryr::object_size(DT)
+# 630 MB
+
+DT[, val := sample(.N)]
+
+```
+
+
+
+

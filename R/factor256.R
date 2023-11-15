@@ -1,7 +1,10 @@
 #' Factors of fewer than 256 elements
 #' @importFrom utils packageName
+#' @importFrom utils hasName
 #' @importFrom utils head
+#' @importFrom utils globalVariables
 #' @importFrom utils tail
+
 #' @useDynLib factor256, .registration=TRUE
 #'
 #' @description Whereas base R's factors are based on 32-bit integer vectors,
@@ -423,6 +426,10 @@ setkeyv256 <- function(DT, cols) {
     data.table::setkeyv(DT, cols)
   }
 }
+
+
+
+
 
 
 

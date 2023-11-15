@@ -1,0 +1,7 @@
+library(factor256)
+DF <- as.data.frame(list(y = 1:25))
+DF$x <- factor256(rep_len(LETTERS[1:5], 25))
+CDF <- factor256:::count_by256(DF, "x")
+expect_equal(CDF$N, rep(5L, 5))
+SDF <- factor256:::sum_by256(DF, by = "x", sum_col = "y")
+expect_equal(SDF$totx, seq(55, 75, by = 5))

@@ -261,6 +261,39 @@ SEXP Ctabulate256(SEXP x) {
   return ans;
 }
 
+SEXP C_sum_by256(SEXP x, SEXP y) {
+  R_xlen_t N = xlength(x);
+  SEXP ans = PROTECT(allocVector(REALSXP, 256));
+  double * restrict ansp = REAL(ans);
+  for (int j = 0; j < 256; ++j) {
+    ansp[j] = 0;
+  }
+
+  const unsigned char * yp = RAW(y);
+  switch(TYPEOF(x)) {
+  case INTSXP:
+  {
+    const int * xp = INTEGER(x);
+    for (R_xlen_t i = 0; i < N; ++i) {
+      int ypi = yp[i];
+      ansp[ypi] += xp[i];
+    }
+  }
+    break;
+  case REALSXP:
+  {
+    const double * xp = REAL(x);
+    for (R_xlen_t i = 0; i < N; ++i) {
+      int ypi = yp[i];
+      ansp[ypi] += xp[i];
+    }
+  }
+  }
+
+  UNPROTECT(1);
+  return ans;
+}
+
 unsigned int nxt_2pwr(unsigned int v) {
   v--;
   v |= v >> 1;
@@ -566,8 +599,6 @@ SEXP C_deinterlace256(SEXP r) {
   UNPROTECT(5);
   return ans;
 }
-
-
 
 
 
