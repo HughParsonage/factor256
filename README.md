@@ -47,6 +47,4 @@ for (j in seq_along(DT)) {
 }
 # pryr::object_size(DT)
 # 630 MB
-
-DT[, val := sample(.N)]
 ```
